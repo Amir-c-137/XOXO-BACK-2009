@@ -30,3 +30,17 @@ async def update_victory_count(game_results: List[GameResultModel]):
         raise HTTPException(status_code=400, detail=str(e))
     finally:
         db.close()
+        
+        
+        
+@app.get("/top_users")
+async def get_top_users():
+    db = SessionLocal()
+    try:
+        top_users_query = db.query(UserGameResult).order_by(UserGameResult.victories.desc()).limit(10)
+        top_users = db.execute(top_users_query).fetchall()
+        return [{"name": user[0].name, "victories": user[0].victories} for user in top_users]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Failed to retrieve top users.")
+    finally:
+        db.close()
